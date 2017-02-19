@@ -1,7 +1,8 @@
-#include "particle.h"
+#include "simulation.h"
 #include <iostream>
 
 int main() {
-	gravity::particle p(1, 1, 1, 1, 1, 1, 1);
+	gravity::init_particles(1000);
+	gravity::run_simulation(100);
 	return 0;
 }
