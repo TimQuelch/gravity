@@ -52,6 +52,7 @@ namespace gravity {
 		float get_mass() const { return _mass; }
 		vec3 get_pos() const { return std::make_tuple(_x, _y, _z); }
 		vec3 get_vel() const { return std::make_tuple(_vx, _vy, _vz); }
+		vec3 get_momentum() const { return std::make_tuple(_vx * _mass, _vy * _mass, _vz * _mass); }
 
 		void set_x(float x);
 		void set_y(float y);
@@ -69,6 +70,7 @@ namespace gravity {
 		void attract(const particle& other);
 		void accelerate(float force_x, float force_y, float force_z);
 		void accelerate(vec3 force);
+		void collide(const particle& other);
 
 	private:
 		float _x;

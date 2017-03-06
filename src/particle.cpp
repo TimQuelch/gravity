@@ -68,4 +68,13 @@ namespace gravity {
 		_vy += std::get<1>(force) / _mass;
 		_vz += std::get<2>(force) / _mass;
 	}
+
+	void particle::collide(const particle& other) {
+		const vec3 this_momentum = get_momentum();
+		const vec3 other_momentum = other.get_momentum();
+		_mass += other._mass;
+		_vx = (std::get<0>(this_momentum) + std::get<0>(other_momentum)) / _mass;
+		_vy = (std::get<1>(this_momentum) + std::get<1>(other_momentum)) / _mass;
+		_vz = (std::get<2>(this_momentum) + std::get<2>(other_momentum)) / _mass;
+	}
 }
