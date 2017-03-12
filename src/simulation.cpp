@@ -21,11 +21,15 @@ namespace gravity {
 		particles.clear();
 		particles.reserve(num_particles);
 		for (int i = 0; i < num_particles; i++) {
-			particles.push_back(particle(pos(), pos(), pos(), vel(), vel(), vel(), 1));
+			vec3 position{pos(), pos(), pos()};
+			vec3 velocity{vel(), vel(), vel()};
+			particles.push_back(particle{position, velocity, 1});
 		}
 	}
 
 	void run_simulation(int num_timesteps) {
+		assert(num_timesteps > 0);
+
 		for (int i = 0; i < num_timesteps; i++) {
 			attract_particles();
 			step_particles();

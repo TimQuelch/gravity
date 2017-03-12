@@ -1,5 +1,4 @@
 #include "simulation.h"
-#include <iostream>
 
 int main() {
 	gravity::init_particles(1000);
