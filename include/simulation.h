@@ -28,6 +28,15 @@ namespace gravity {
 	void attract_particles();
 
 	/**
+	 * @brief Collide nearby particles
+	 *
+	 * Particles whose radii overlap will be collided, merging into a single particle. One of the
+	 * particles in a collision has it's mass and velocity updated to conserve momentum, and the
+	 * other is removed from the simulation
+	 */
+	void collide_particles();
+
+	/**
 	 * @brief Step all particles according to their velocity vector
 	 */
 	void step_particles();

@@ -39,4 +39,9 @@ namespace gravity {
 		_vel = (this_momentum + other_momentum).scale(1 / _mass);
 		_radius = compute_radius();
 	}
+
+	bool particle::check_collision(const particle& other) {
+		const float dist = (_pos - other.pos()).magnitude();
+		return dist <= (radius() + other.radius());
+	}
 }

@@ -31,6 +31,7 @@ namespace gravity {
 		assert(num_timesteps > 0);
 
 		for (int i = 0; i < num_timesteps; i++) {
+			collide_particles();
 			attract_particles();
 			step_particles();
 		}
@@ -43,6 +44,30 @@ namespace gravity {
 					p.attract(other);
 				}
 			}
+		}
+	}
+
+	void collide_particles() {
+		// Each time there is a collision, all particles must be checked again for collisions with
+		// the new particle
+		auto one = particles.begin();
+		while (one != particles.end()) {
+			auto two = particles.begin();
+			while (two != particles.end()) {
+				if (one != two && one->check_collision(*two)) {
+					// Collide particles, merging two into one
+					one->collide(*two);
+					// Remove two (it is now merged with one
+					particles.erase(two);
+					// Reset iterators at the beginning, as they are both invalid now
+					// And new particle may be colliding with other particles
+					one = particles.begin();
+					two = particles.begin();
+				} else {
+					two++; // If no collision, increment two normally
+				}
+			}
+			one++;
 		}
 	}
 

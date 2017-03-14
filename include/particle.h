@@ -196,6 +196,15 @@ namespace gravity {
 		 */
 		void collide(const particle& other);
 
+		/**
+		 * @brief Checks whether the particle is colliding with another particle
+		 *
+		 * @param other Another particle
+		 *
+		 * @return True if the particles radii are overlapping
+		 */
+		bool check_collision(const particle& other);
+
 	private:
 		vec3 _pos{0, 0, 0};
 		vec3 _vel{0, 0, 0};
