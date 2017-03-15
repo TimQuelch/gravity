@@ -7,6 +7,7 @@
 #ifndef GRAVITY_PARTICLE_H
 #define GRAVITY_PARTICLE_H
 
+#include <cmath>
 #include <stdexcept>
 
 namespace gravity {
@@ -129,7 +130,8 @@ namespace gravity {
 		particle(vec3 position, vec3 velocity, float mass)
 		    : _pos{position}
 		    , _vel{velocity}
-		    , _mass{mass > 0 ? mass : throw std::invalid_argument{"Mass must be positive"}} {}
+		    , _mass{mass > 0 ? mass : throw std::invalid_argument{"Mass must be positive"}}
+		    , _radius{compute_radius()} {}
 
 		/**
 		 * @brief Gets the position of the particle
@@ -160,6 +162,16 @@ namespace gravity {
 		float mass() const { return _mass; }
 
 		/**
+		 * @brief Gets the radius of the particle
+		 *
+		 * The radius of the particle depends on the mass. Radius should be updated each time the
+		 * mass of the particle changes.
+		 *
+		 * @return The radius of the particle
+		 */
+		float radius() const { return _radius; }
+
+		/**
 		 * @brief Steps the particle in the direction of the velocity vector
 		 */
 		void step();
@@ -184,10 +196,29 @@ namespace gravity {
 		 */
 		void collide(const particle& other);
 
+		/**
+		 * @brief Checks whether the particle is colliding with another particle
+		 *
+		 * @param other Another particle
+		 *
+		 * @return True if the particles radii are overlapping
+		 */
+		bool check_collision(const particle& other);
+
 	private:
 		vec3 _pos{0, 0, 0};
 		vec3 _vel{0, 0, 0};
 		float _mass{1};
+		float _radius{compute_radius()};
+
+		/**
+		 * @brief Compute the radius of the particle
+		 *
+		 * This should be used to update the radius of the particle any time the mass is changed.
+		 * The value is derived from the volume of a sphere, V = 4pi/3 r^3. It is assumed that
+		 * density is normalised.
+		 */
+		float compute_radius() const { return std::cbrt((3 * _mass) / (4 * M_PI)); }
 	};
 }
 

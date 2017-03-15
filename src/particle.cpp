@@ -1,5 +1,4 @@
 #include "particle.h"
-#include <cmath>
 
 namespace gravity {
 	float vec3::magnitude() const { return std::sqrt(x * x + y * y + z * z); }
@@ -38,5 +37,11 @@ namespace gravity {
 		const vec3 other_momentum = other.momentum();
 		_mass += other._mass;
 		_vel = (this_momentum + other_momentum).scale(1 / _mass);
+		_radius = compute_radius();
+	}
+
+	bool particle::check_collision(const particle& other) {
+		const float dist = (_pos - other.pos()).magnitude();
+		return dist <= (radius() + other.radius());
 	}
 }
