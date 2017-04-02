@@ -24,7 +24,7 @@ namespace gravity {
 	void particle::step() { _pos += _vel; }
 
 	void particle::attract(const particle& other) {
-		const vec3 dist = _pos - other.pos();
+		const vec3 dist = other.pos() - _pos;
 		const float radius = dist.magnitude();
 		const float radius_cb = radius * radius * radius;
 		const float accel_factor = gravitational_constant * other.mass() / radius_cb;
