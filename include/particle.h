@@ -45,10 +45,10 @@ namespace gravity {
 		 * @param yval Initial y component
 		 * @param zval Initial z component
 		 */
-		vec3(float xval, float yval, float zval)
-		    : x{xval}
-		    , y{yval}
-		    , z{zval} {}
+		vec3(float x, float y, float z)
+		    : x{x}
+		    , y{y}
+		    , z{z} {}
 
 		/**
 		 * @brief Calculate the magnitude of the vector
