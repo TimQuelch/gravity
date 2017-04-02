@@ -41,9 +41,9 @@ namespace gravity {
 		/**
 		 * @brief Create vector with initial values
 		 *
-		 * @param xval Initial x component
-		 * @param yval Initial y component
-		 * @param zval Initial z component
+		 * @param x Initial x component
+		 * @param y Initial y component
+		 * @param z Initial z component
 		 */
 		vec3(float x, float y, float z)
 		    : x{x}
