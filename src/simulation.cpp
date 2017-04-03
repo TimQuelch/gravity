@@ -1,5 +1,6 @@
 #include "simulation.h"
 #include "particle.h"
+#include "visualisation.h"
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -8,7 +9,8 @@
 
 namespace gravity {
 	namespace {
-		std::vector<particle> particles;
+		std::vector<particle> particles{};
+		visualisation vis{};
 	}
 
 	void init_particles(int num_particles) {
@@ -25,6 +27,9 @@ namespace gravity {
 			vec3 velocity{vel(), vel(), vel()};
 			particles.push_back(particle{position, velocity, 1});
 		}
+		vis.update_data(particles);
+		vis.refresh_window();
+		vis.reset_camera();
 	}
 
 	void run_simulation(int num_timesteps) {
@@ -34,6 +39,8 @@ namespace gravity {
 			collide_particles();
 			attract_particles();
 			step_particles();
+			vis.update_data(particles);
+			vis.refresh_window();
 		}
 	}
 
