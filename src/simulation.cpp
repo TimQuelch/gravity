@@ -15,8 +15,8 @@ namespace gravity {
 		assert(num_particles > 0);
 
 		std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
-		auto pos = std::bind(std::uniform_real_distribution<float>(-150, 150), rng);
-		auto vel = std::bind(std::uniform_real_distribution<float>(-10, 10), rng);
+		auto pos = std::bind(std::uniform_real_distribution<float>(-100, 100), rng);
+		auto vel = std::bind(std::uniform_real_distribution<float>(-0.2, 0.2), rng);
 
 		particles.clear();
 		particles.reserve(num_particles);

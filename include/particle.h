@@ -14,7 +14,8 @@ namespace gravity {
 	/**
 	 * \brief Gravitational constant. Gravitational forces are proportional to this constant
 	 */
-	const float gravitational_constant = 6.674e-11;
+	const float gravitational_constant = 0.10;
+	// const float gravitational_constant = 6.674e-11;
 
 	/**
 	 * /brief Simple 3D vector of floats
