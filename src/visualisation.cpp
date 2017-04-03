@@ -1,6 +1,8 @@
 #include "visualisation.h"
 #include <vtkCamera.h>
+#include <vtkFloatArray.h>
 #include <vtkGlyph3D.h>
+#include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
@@ -43,35 +45,21 @@ namespace gravity {
 		auto points = vtkSP<vtkPoints>::New();
 		points->SetNumberOfPoints(particles.size());
 
-		/*
-		auto velocities = vtkSP<vtkFloatArray>::New();
-		velocities->SetName("velocity");
-		velocities->SetNumberOfTuples(particles.size());
-		velocities->SetNumberOfValues(particles.size() * 3);
-
-		auto masses = vtkSP<vtkFloatArray>::New();
-		velocities->SetName("mass");
-		velocities->SetNumberOfTuples(particles.size());
-		velocities->SetNumberOfValues(particles.size());
-		*/
+		auto radii = vtkSP<vtkFloatArray>::New();
+		radii->SetName("radius");
+		radii->SetNumberOfComponents(1);
+		radii->SetNumberOfTuples(particles.size());
 
 		for (int i = 0; i < particles.size(); i++) {
 			vec3 pos = particles[i].pos();
 			float pos_array[3] = {pos.x, pos.y, pos.z};
 			points->SetPoint(i, pos_array);
-			/*
-			vec3 vel = p.vel();
-			float vel_tuple[3] = {vel.x, vel.y, vel.z};
-			velocities->InsertNextTuple(vel_tuple);
-			masses->InsertNextValue(p.mass());
-			*/
+
+			float radius = particles[i].radius();
+			radii->SetTuple(i, &radius);
 		}
 
-		//_data = vtkSP<vtkPolyData>::New();
 		_data->SetPoints(points);
-		/*
-		grid->GetPointData()->SetVectors(velocities);
-		grid->GetPointData()->SetScalars(masses);
-		*/
+		_data->GetPointData()->SetScalars(radii);
 	}
 }
