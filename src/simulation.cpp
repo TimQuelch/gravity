@@ -1,9 +1,9 @@
 #include "simulation.h"
 #include "particle.h"
-#include <cassert>
 #include <chrono>
 #include <functional>
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 namespace gravity {
@@ -12,11 +12,13 @@ namespace gravity {
 	}
 
 	void init_particles(int num_particles) {
-		assert(num_particles > 0);
+		if (num_particles <= 0) {
+			throw std::invalid_argument{"Number of particles must be greater than 0"};
+		}
 
 		std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
-		auto pos = std::bind(std::uniform_real_distribution<float>(-100, 100), rng);
-		auto vel = std::bind(std::uniform_real_distribution<float>(-0.2, 0.2), rng);
+		auto pos = [&rng]() { return std::uniform_real_distribution<float>(-100, 100)(rng); };
+		auto vel = [&rng]() { return std::uniform_real_distribution<float>(-0.2, 0.2)(rng); };
 
 		particles.clear();
 		particles.reserve(num_particles);
@@ -28,7 +30,9 @@ namespace gravity {
 	}
 
 	void run_simulation(int num_timesteps) {
-		assert(num_timesteps > 0);
+		if (num_timesteps <= 0) {
+			throw std::invalid_argument{"Number of timesteps must be greater than 0"};
+		}
 
 		for (int i = 0; i < num_timesteps; i++) {
 			collide_particles();
@@ -56,7 +60,7 @@ namespace gravity {
 			while (two != particles.end()) {
 				if (one != two && particle::check_collision(*one, *two)) {
 					// Collide particles, merging two into one
-                    *one = particle::collide(*one, *two);
+					*one = particle::collide(*one, *two);
 					// Remove two (it is now merged with one
 					particles.erase(two);
 					// Reset iterators at the beginning, as they are both invalid now
@@ -77,4 +81,3 @@ namespace gravity {
 		}
 	}
 }
-
