@@ -54,9 +54,9 @@ namespace gravity {
 		while (one != particles.end()) {
 			auto two = particles.begin();
 			while (two != particles.end()) {
-				if (one != two && one->check_collision(*two)) {
+				if (one != two && particle::check_collision(*one, *two)) {
 					// Collide particles, merging two into one
-					one->collide(*two);
+                    *one = particle::collide(*one, *two);
 					// Remove two (it is now merged with one
 					particles.erase(two);
 					// Reset iterators at the beginning, as they are both invalid now

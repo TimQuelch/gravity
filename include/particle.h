@@ -18,7 +18,7 @@ namespace gravity {
 	// const float gravitational_constant = 6.674e-11;
 
 	/**
-	 * /brief Simple 3D vector of floats
+	 * \brief Simple 3D vector of floats
 	 */
 	struct vec3 {
 		float x{0}; /**< \brief x component of vector */
@@ -42,14 +42,13 @@ namespace gravity {
 		 * \brief Calculate the magnitude of the vector
 		 * \return The magnitude of the vector
 		 */
-		float magnitude() const;
+		float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
 
 		/**
-		 * \brief Scales the vector by a scalar
-		 * \param factor The scalar to scale the vector by
-		 * \return The scaled vector
+		 * \brief Calculate the unit vector of the vector
+		 * \return The unit vector
 		 */
-		vec3 scale(float factor) const { return {factor * x, factor * y, factor * z}; }
+		vec3 direction() const { return *this * (1 / magnitude()); }
 
 		/**
 		 * \brief Add vector to this vector
@@ -59,28 +58,66 @@ namespace gravity {
 		vec3& operator+=(const vec3& other);
 
 		/**
+		 * \brief Add two vectors together
+		 * \param one A vector
+		 * \param two Another vector
+		 * \return The sum of the two vectors
+		 */
+		friend vec3 operator+(const vec3& one, const vec3& two) { return vec3{one} += two; }
+
+		/**
 		 * \brief Subtract vector from this vector
 		 * \param other Another vector
 		 * \return *this
 		 */
 		vec3& operator-=(const vec3& other);
+
+		/**
+		 * \brief Subtract a vector from another
+		 * \param one A vector
+		 * \param two Another vector
+		 * \return The difference of the two vectors
+		 */
+		friend vec3 operator-(const vec3& one, const vec3& two) { return vec3{one} -= two; }
+
+		/**
+		 * \brief Multiply the vector by a scalar
+		 * \tparam A numeric scalar type
+		 * \param scalar The scalar value
+		 * \return *this
+		 */
+		template <typename Scalar>
+		vec3& operator*=(Scalar scalar) {
+			x *= scalar;
+			y *= scalar;
+			z *= scalar;
+			return *this;
+		}
+
+		/**
+		 * \brief Multiply a vector by a scalar
+		 * \tparam A numeric scalar type
+		 * \param scalar The scalar value
+		 * \param vec The vector
+		 * \return The scaled vector
+		 */
+		template <typename Scalar>
+		friend vec3 operator*(Scalar scalar, const vec3& vec) {
+			return vec3{vec} *= scalar;
+		}
+
+		/**
+		 * \brief Multiply a vector by a scalar
+		 * \tparam A numeric scalar type
+		 * \param scalar The scalar value
+		 * \param vec The vector
+		 * \return The scaled vector
+		 */
+		template <typename Scalar>
+		friend vec3 operator*(const vec3& vec, Scalar scalar) {
+			return vec3{vec} *= scalar;
+		}
 	};
-
-	/**
-	 * \brief Add two vectors together
-	 * \param one A vector
-	 * \param two Another vector
-	 * \return The sum of the two vectors
-	 */
-	vec3 operator+(const vec3& one, const vec3& two);
-
-	/**
-	 * \brief Subtract a vector from another
-	 * \param one A vector
-	 * \param two Another vector
-	 * \return The difference of the two vectors
-	 */
-	vec3 operator-(const vec3& one, const vec3& two);
 
 	/**
 	 * \brief A single particle in a n-body simulation
@@ -123,7 +160,7 @@ namespace gravity {
 		 * \brief Gets the momentum of the particle. Momentum = mass * velocity
 		 * \return The momentum of the particle
 		 */
-		vec3 momentum() const { return _vel.scale(_mass); }
+		vec3 momentum() const { return _vel * _mass; }
 
 		/**
 		 * \brief Gets the mass of the particle
@@ -145,26 +182,28 @@ namespace gravity {
 		void step();
 
 		/**
-		 * \brief Attracts a particle to another particle by gravity
+		 * \brief Attracts a particle to another particle by gravity.
 		 * This modifies the velocity of the particle, but not the position
 		 * \param other Another particle
 		 */
 		void attract(const particle& other);
 
 		/**
-		 * \brief Collides two particles together
-		 * Sets new mass and velocity vectors, conserving momentum. It is assumed that the other
-		 * particle is removed from the simulation
-		 * \param other Another particle
+		 * \brief Merge two particles together when they collide.
+		 * New particle is created conserving momentum.
+		 * \param one A particle
+		 * \param two Another particle
+		 * \return The particle that is the result of the collision
 		 */
-		void collide(const particle& other);
+		static particle collide(const particle& one, const particle& two);
 
 		/**
-		 * \brief Checks whether the particle is colliding with another particle
-		 * \param other Another particle
-		 * \return True if the particles radii are overlapping
+		 * \brief Checks whether two particles are colliding
+		 * \param one A particle
+		 * \param two Another particle
+		 * \return True if the particles' radii are overlapping
 		 */
-		bool check_collision(const particle& other);
+		static bool check_collision(const particle& one, const particle& two);
 
 	private:
 		vec3 _pos{0, 0, 0};
