@@ -107,7 +107,7 @@ namespace gravity {
 		    : pos_{position}
 		    , vel_{velocity}
 		    , mass_{mass > 0 ? mass : throw std::invalid_argument{"Mass must be positive"}}
-		    , radius_{computeRadius()} {}
+		    , radius_{computeRadius(mass)} {}
 
 		/// Gets the position of the particle
 		/// \return The position of the particle
@@ -156,13 +156,15 @@ namespace gravity {
 		Vec3 pos_{0, 0, 0};
 		Vec3 vel_{0, 0, 0};
 		float mass_{1};
-		float radius_{computeRadius()};
+		float radius_{computeRadius(mass_)};
 
-		/// Compute the radius of the particle
+		/// Compute the radius of the particle of a given mass
 		/// This should be used to update the radius of the particle any time the mass is changed.
 		/// The value is derived from the volume of a sphere, V = 4pi/3 r^3. It is assumed that
 		/// density is normalised.
-		float computeRadius() const { return std::cbrt((3 * mass_) / (4 * M_PI)); }
+		/// \param mass The mass of the particle
+		/// \return The radius of the particle
+		static float computeRadius(float mass) { return std::cbrt((3 * mass) / (4 * M_PI)); }
 	};
 }
 
