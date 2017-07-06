@@ -8,11 +8,11 @@
 
 namespace gravity {
 	namespace {
-		std::vector<particle> particles;
+		std::vector<Particle> particles;
 	}
 
-	void init_particles(int num_particles) {
-		if (num_particles <= 0) {
+	void initParticles(int numParticles) {
+		if (numParticles <= 0) {
 			throw std::invalid_argument{"Number of particles must be greater than 0"};
 		}
 
@@ -21,29 +21,29 @@ namespace gravity {
 		auto vel = [&rng]() { return std::uniform_real_distribution<float>(-0.2, 0.2)(rng); };
 
 		particles.clear();
-		particles.reserve(num_particles);
-		for (int i = 0; i < num_particles; i++) {
-			vec3 position{pos(), pos(), pos()};
-			vec3 velocity{vel(), vel(), vel()};
-			particles.push_back(particle{position, velocity, 1});
+		particles.reserve(numParticles);
+		for (int i = 0; i < numParticles; i++) {
+			Vec3 position{pos(), pos(), pos()};
+			Vec3 velocity{vel(), vel(), vel()};
+			particles.push_back(Particle{position, velocity, 1});
 		}
 	}
 
-	void run_simulation(int num_timesteps) {
-		if (num_timesteps <= 0) {
+	void runSimulation(int numTimesteps) {
+		if (numTimesteps <= 0) {
 			throw std::invalid_argument{"Number of timesteps must be greater than 0"};
 		}
 
-		for (int i = 0; i < num_timesteps; i++) {
-			collide_particles();
-			attract_particles();
-			step_particles();
+		for (int i = 0; i < numTimesteps; i++) {
+			collideParticles();
+			attractParticles();
+			stepParticles();
 		}
 	}
 
-	void attract_particles() {
-		for (particle& p : particles) {
-			for (const particle& other : particles) {
+	void attractParticles() {
+		for (Particle& p : particles) {
+			for (const Particle& other : particles) {
 				if (&p != &other) {
 					p.attract(other);
 				}
@@ -51,16 +51,16 @@ namespace gravity {
 		}
 	}
 
-	void collide_particles() {
+	void collideParticles() {
 		// Each time there is a collision, all particles must be checked again for collisions with
 		// the new particle
 		auto one = particles.begin();
 		while (one != particles.end()) {
 			auto two = particles.begin();
 			while (two != particles.end()) {
-				if (one != two && particle::check_collision(*one, *two)) {
+				if (one != two && Particle::checkCollision(*one, *two)) {
 					// Collide particles, merging two into one
-					*one = particle::collide(*one, *two);
+					*one = Particle::collide(*one, *two);
 					// Remove two (it is now merged with one
 					particles.erase(two);
 					// Reset iterators at the beginning, as they are both invalid now
@@ -75,8 +75,8 @@ namespace gravity {
 		}
 	}
 
-	void step_particles() {
-		for (particle& p : particles) {
+	void stepParticles() {
+		for (Particle& p : particles) {
 			p.step();
 		}
 	}

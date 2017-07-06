@@ -10,20 +10,20 @@
 namespace gravity {
 	/**
 	 * \brief Initialise particles to random positions
-	 * \param num_particles The number of particles
+	 * \param numParticles The number of particles
 	 */
-	void init_particles(int num_particles);
+	void initParticles(int numParticles);
 
 	/**
 	 * \brief Run the simulation
-	 * \param num_timesteps Number of timesteps to run
+	 * \param numTimesteps Number of timesteps to run
 	 */
-	void run_simulation(int num_timesteps);
+	void runSimulation(int numTimesteps);
 
 	/**
 	 * \brief Attract all particles to each other
 	 */
-	void attract_particles();
+	void attractParticles();
 
 	/**
 	 * \brief Collide nearby particles
@@ -31,12 +31,12 @@ namespace gravity {
 	 * particles in a collision has it's mass and velocity updated to conserve momentum, and the
 	 * other is removed from the simulation
 	 */
-	void collide_particles();
+	void collideParticles();
 
 	/**
 	 * \brief Step all particles according to their velocity vector
 	 */
-	void step_particles();
+	void stepParticles();
 }
 
 #endif

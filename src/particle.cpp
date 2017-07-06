@@ -1,41 +1,41 @@
 #include "particle.h"
 
 namespace gravity {
-	vec3& vec3::operator+=(const vec3& other) {
+	Vec3& Vec3::operator+=(const Vec3& other) {
 		x += other.x;
 		y += other.y;
 		z += other.z;
 		return *this;
 	}
 
-	vec3& vec3::operator-=(const vec3& other) {
+	Vec3& Vec3::operator-=(const Vec3& other) {
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
 		return *this;
 	}
 
-	void particle::step() { _pos += _vel; }
+	void Particle::step() { pos_ += vel_; }
 
-	void particle::attract(const particle& other) {
-		const vec3 dist = other.pos() - _pos;
+	void Particle::attract(const Particle& other) {
+		const Vec3 dist = other.pos() - pos_;
 		const float radius = dist.magnitude();
-		const float radius_cb = radius * radius * radius;
-		const float accel_factor = gravitational_constant * other.mass() / radius_cb;
+		const float radiusCubed = radius * radius * radius;
+		const float accelFactor = gravitationalConstant * other.mass() / radiusCubed;
 
-		_vel += dist * accel_factor;
+		vel_ += dist * accelFactor;
 	}
 
-	particle particle::collide(const particle& one, const particle& two) {
+	Particle Particle::collide(const Particle& one, const Particle& two) {
 		const float mass_one = one.mass();
 		const float mass_two = two.mass();
 		const float mass = mass_one + mass_two;
-		const vec3 pos = (two.pos() - one.pos()) * (mass_two / mass);
-		const vec3 vel = (one.momentum() + two.momentum()) * (1 / mass);
+		const Vec3 pos = (two.pos() - one.pos()) * (mass_two / mass);
+		const Vec3 vel = (one.momentum() + two.momentum()) * (1 / mass);
 		return {pos, vel, mass};
 	}
 
-	bool particle::check_collision(const particle& one, const particle& two) {
+	bool Particle::checkCollision(const Particle& one, const Particle& two) {
 		const float dist = (one.pos() - two.pos()).magnitude();
 		return dist <= (one.radius() + two.radius());
 	}

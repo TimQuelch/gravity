@@ -1,7 +1,7 @@
 #include "simulation.h"
 
 int main() {
-	gravity::init_particles(1000);
-	gravity::run_simulation(10000);
+	gravity::initParticles(1000);
+	gravity::runSimulation(10000);
 	return 0;
 }
