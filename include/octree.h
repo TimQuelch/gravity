@@ -25,7 +25,7 @@ namespace gravity {
 			/// Construct Domain with default values
 			Domain() = default;
 
-			/// Construct Domain with two vectors. The domain is constructed from the extremes of
+			/// Construct Domain with two vectors. The Domain is constructed from the extremes of
 			/// these vectors
 			/// \param v1 The first vector
 			/// \param v2 The second vector
@@ -41,7 +41,7 @@ namespace gravity {
 			/// \return The index of the octant the position belongs to
 			int getOctantIndex(Vec3 pos) const;
 
-			/// Get the Domain a octant in the domain
+			/// Get the Domain a octant in the Domain
 			/// \param octantIndex The index of the octant
 			/// \return The Domain of the octant
 			/// \throw std::invalid_argument If octantIndex is not an integer from 0-7
@@ -52,9 +52,9 @@ namespace gravity {
 			Vec3 max_{0, 0, 0}; ///< The maximum extremes of the Domain
 		};
 
-		/// Construct an Octree for a given set of particles and given domain
+		/// Construct an Octree for a given set of particles and given Domain
 		/// \param particles A list of particles
-		/// \param domain The domain of the Octree
+		/// \param domain The Domain of the Octree
 		/// \throw std::invalid_argument If list of particles is empty
 		Octree(const ParticleList& particles, Domain domain);
 
@@ -67,15 +67,15 @@ namespace gravity {
 		/// Shorthand for a list of Nodes
 		using NodeList = std::list<std::shared_ptr<Node>>;
 
-		/// A Node in the Octree. Has a mass, center of mass, and a domain
+		/// A Node in the Octree. Has a mass, center of mass, and a Domain
 		class Node {
 		public:
 			/// Construct a Node with default values
 			Node() = default;
 
-			/// Construct a Node for a given set of Particles and domain
+			/// Construct a Node for a given set of Particles and Domain
 			/// \param particles A list of pointers to particles
-			/// \param domain The domain of the Node
+			/// \param domain The Domain of the Node
 			/// \throw std::invalid_argument If list of particles is empty
 			Node(const ParticleList& particles, Domain domain);
 
@@ -123,7 +123,7 @@ namespace gravity {
 
 			/// Build a list of child nodes from a given list of particles
 			/// \param particles A list of pointers to particles
-			/// \param domain The domain of the parent node
+			/// \param domain The Domain of the parent node
 			/// \return A list of child nodes
 			/// \throw std::invalid_argument If the list of particles does not contain at least two
 			/// particles
@@ -132,7 +132,7 @@ namespace gravity {
 			Vec3 centerOfMass_{0, 0, 0}; ///< Center of mass of the Node
 			float mass_{1};              ///< Mass of the Node
 			Domain domain_{};            ///< Domain of the Node
-			ParticleList particles_{};   ///< Represented Partaicles
+			ParticleList particles_{};   ///< Particles represented by the Node
 			NodeList children_{};        ///< Child Nodes
 		};
 
