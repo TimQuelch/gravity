@@ -1,5 +1,7 @@
 #include "octree.h"
 
+#include <algorithm>
+
 namespace gravity {
 	Octree::Domain::Domain(Vec3 v1, Vec3 v2)
 	    : min_{std::min(v1.x, v2.x), std::min(v1.y, v2.y), std::min(v1.z, v2.z)}
@@ -103,6 +105,75 @@ namespace gravity {
 			mass_ = computeMass(children_);
 			centerOfMass_ = computeCenterOfMass(children_);
 		}
+	}
+
+	Octree::Node::Node(const ParticlePtr& particle, Domain domain)
+	    : domain_{domain}
+	    , particles_{}
+	    , children_{} {
+		particles_.push_back(particle);
+		mass_ = particle->mass();
+		centerOfMass_ = particle->pos();
+	}
+
+	void Octree::Node::addParticle(const ParticlePtr& particle) {
+		if (!domain_.isInDomain(particle->pos())) {
+			throw std::invalid_argument("Particle is not in the Node's Domain");
+		}
+		if (contains(particle)) {
+			throw std::invalid_argument("Particle is already held by the Node");
+		}
+		// Add particle to the list of particles in the Node
+		particles_.push_back(particle);
+
+		// If there are no child Nodes, build them.
+		// This happens when the Node was previously an external Node
+		if (children_.empty()) {
+			children_ = buildChildren(particles_, domain_);
+		} else {
+			// If any of the current children has an appropriate domain, add the particle to it
+			bool added = false;
+			for (auto child : children_) {
+				if (child->domain_.isInDomain(particle->pos())) {
+					child->addParticle(particle);
+					added = true;
+					break;
+				}
+			}
+			// If not, create a new child Node with the particle
+			if (!added) {
+				Domain newDomain = domain_.getOctantDomain(domain_.getOctantIndex(particle->pos()));
+				auto newChild = std::make_shared<Node>(particle, newDomain);
+				children_.push_back(newChild);
+			}
+		}
+		// Recompute mass and center of mass
+		mass_ = computeMass(children_);
+		centerOfMass_ = computeCenterOfMass(children_);
+	}
+
+	void Octree::Node::removeParticle(const ParticlePtr& particle) {
+		if (!contains(particle)) {
+			throw std::invalid_argument("Particle is not held in the node");
+		}
+		// Remove particle from the list of particles
+		particles_.erase(std::find(particles_.begin(), particles_.end(), particle));
+		// Remove the particle from the relevant child
+		for (auto child : children_) {
+			if (child->contains(particle)) {
+				child->removeParticle(particle);
+				break;
+			}
+		}
+	}
+
+	bool Octree::Node::contains(const ParticlePtr& particle) {
+		for (const auto& p : particles_) {
+			if (p == particle) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	float Octree::Node::computeMass(const NodeList& nodes) {

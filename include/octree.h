@@ -15,7 +15,9 @@ namespace gravity {
 	class Octree {
 	public:
 		/// Shorthand for a list of Particles
-		using ParticleList = std::list<std::shared_ptr<Particle>>;
+		using ParticlePtr = std::shared_ptr<Particle>;
+		/// Shorthand for Particle smart pointer
+		using ParticleList = std::list<ParticlePtr>;
 
 		/// A class to hold the 3D bounds of a region of space
 		class Domain {
@@ -77,6 +79,11 @@ namespace gravity {
 			/// \throw std::invalid_argument If list of particles is empty
 			Node(const ParticleList& particles, Domain domain);
 
+			/// Construct a Node for a given Particle and Domain
+			/// \param particle A Particle
+			/// \param domain Domain of the Node
+			Node(const ParticlePtr& particle, Domain domain);
+
 			/// Get the center of mass of the Node
 			/// \return The center of mass
 			Vec3 centerOfMass() const { return centerOfMass_; }
@@ -84,6 +91,22 @@ namespace gravity {
 			/// Get the mass of the Node
 			/// \return The mass
 			float mass() const { return mass_; }
+
+			/// Add a particle to the Node
+			/// \param particle A pointer to a particle
+			/// \throw std::invalid_argument If the particle is not within the Node Domain, or the
+			/// particle is already held by the Node
+			void addParticle(const ParticlePtr& particle);
+
+			/// Remove a particle from the Node
+			/// \param particle A pointer to a particle
+			/// \throw std::invalid_argument If the particle is not held by the Node
+			void removeParticle(const ParticlePtr& particle);
+
+			/// Check whether the Node contains a particle
+			/// \param particle A Particle
+			/// \return Whether the particle is in the Node or not
+			bool contains(const ParticlePtr& particle);
 
 		private:
 			/// Compute the total mass of a given list of Nodes. Should be used to set the mass
