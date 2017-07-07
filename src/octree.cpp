@@ -12,7 +12,7 @@ namespace gravity {
 		return inX && inY && inZ;
 	}
 
-	int Octree::Domain::getOctant(Vec3 pos) const {
+	int Octree::Domain::getOctantIndex(Vec3 pos) const {
 		const Vec3 mid = min_ + ((max_ - min_) * 0.5);
 		if (pos.z >= mid.z) {
 			if (pos.y >= mid.y) {
@@ -45,7 +45,7 @@ namespace gravity {
 		}
 	}
 
-	Octree::Domain Octree::Domain::getSubdomain(int octantIndex) const {
+	Octree::Domain Octree::Domain::getOctantDomain(int octantIndex) const {
 		if (octantIndex >= 8 || octantIndex < 0) {
 			throw std::invalid_argument("Invalid octant index");
 		}
@@ -81,39 +81,39 @@ namespace gravity {
 		return {mid, outerCorner};
 	}
 
-	Octree::Octree(const std::list<Particle>& particles, Domain domain) {
-		if (particles.size() <= 0) {
+	Octree::Octree(const std::list<std::shared_ptr<Particle>>& particles, Domain domain)
+	    : root_{particles, domain} {
+		if (particles.empty()) {
 			throw std::invalid_argument("Must be at least one particle in Octree");
 		}
-		if (particles.size() == 1) {
-			root_ = std::make_unique<ExternalNode>(*(particles.begin()), domain);
-		} else {
-			root_ = std::make_unique<InternalNode>(particles, domain);
-		}
 	}
 
-	Octree::InternalNode::InternalNode(const std::list<Particle>& particles, Domain domain) {
-		std::array<std::list<Particle>, 8> octants;
-		for (const Particle& particle : particles) {
-			int octantIndex = domain.getOctant(particle.pos());
-			octants[octantIndex].push_back(particle);
+	Octree::Node::Node(const std::list<std::shared_ptr<Particle>>& particles, Domain domain)
+	    : domain_{domain}
+	    , particles_{particles}
+	    , children_{} {
+		if (particles.empty()) {
+			throw std::invalid_argument("Node must contain at least one Particle");
 		}
-		for (int i = 0; i < octants.size(); i++) {
-			if (octants[i].size() != 0) {
-				if (octants[i].size() == 1) {
-					subnodes_.push_back(
-					    ExternalNode{*(octants[i].begin()), domain.getSubdomain(i)});
-				} else {
-					subnodes_.push_back(InternalNode{particles, domain});
+		if (particles.size() == 1) {
+			mass_ = (*(particles.begin()))->mass();
+			centerOfMass_ = (*(particles.begin()))->pos();
+		} else {
+			std::array<std::list<std::shared_ptr<Particle>>, 8> octants{};
+			for (std::shared_ptr<Particle> particle : particles) {
+				octants[domain.getOctantIndex(particle->pos())].push_back(particle);
+			}
+			for (int i = 0; i < octants.size(); i++) {
+				if (!octants[i].empty()) {
+					children_.push_back(Node{particles, domain.getOctantDomain(i)});
 				}
 			}
+			mass_ = computeMass(children_);
+			centerOfMass_ = computeCenterOfMass(children_);
 		}
-		domain_ = domain;
-		mass_ = computeMass(subnodes_);
-		centerOfMass_ = computeCenterOfMass(subnodes_);
 	}
 
-	float Octree::InternalNode::computeMass(const std::list<Node>& nodes) {
+	float Octree::Node::computeMass(const std::list<Node>& nodes) {
 		float sum{0};
 		for (const Node& node : nodes) {
 			sum += node.mass();
@@ -121,7 +121,7 @@ namespace gravity {
 		return sum;
 	}
 
-	Vec3 Octree::InternalNode::computeCenterOfMass(const std::list<Node>& nodes) {
+	Vec3 Octree::Node::computeCenterOfMass(const std::list<Node>& nodes) {
 		float sumMass = 0;
 		Vec3 sumProduct{0, 0, 0};
 		for (const Node& node : nodes) {

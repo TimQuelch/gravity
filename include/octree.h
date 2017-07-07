@@ -8,6 +8,7 @@
 #include "particle.h"
 #include <list>
 #include <memory>
+#include <stdexcept>
 
 namespace gravity {
 	/// Class to hold an Octree of particles
@@ -33,13 +34,13 @@ namespace gravity {
 			/// Get the index of the octant that a position is in. Octants are integers from 0-7
 			/// \param pos The position to categorise
 			/// \return The index of the octant the position belongs to
-			int getOctant(Vec3 pos) const;
+			int getOctantIndex(Vec3 pos) const;
 
 			/// Get the Domain a octant in the domain
 			/// \param octantIndex The index of the octant
 			/// \return The Domain of the octant
 			/// \throw std::invalid_argument If octantIndex is not an integer from 0-7
-			Domain getSubdomain(int octantIndex) const;
+			Domain getOctantDomain(int octantIndex) const;
 
 		private:
 			Vec3 min_{0, 0, 0}; ///< The minimum extremes of the Domain
@@ -50,88 +51,54 @@ namespace gravity {
 		/// \param particles A list of particles
 		/// \param domain The domain of the Octree
 		/// \throw std::invalid_argument If list of particles is empty
-		Octree(const std::list<Particle>& particles, Domain domain);
+		Octree(const std::list<std::shared_ptr<Particle>>& particles, Domain domain);
 
 		/// Get the Domain of the Octree
 		/// \return The Domain of the Octree
 		Domain domain() const;
 
 	private:
-		/// A node in the Octree. Has a mass, center of mass, and a domain
+		/// A Node in the Octree. Has a mass, center of mass, and a domain
 		class Node {
 		public:
 			/// Construct a Node with default values
 			Node() = default;
 
-			/// Construct a Node with a given center of mass, mass and domain
-			/// \param centerOfMass The center of mass of the node
-			/// \param mass The mass of the node
-			/// \param domain The domain of the node
-			Node(Vec3 centerOfMass, float mass, Domain domain)
-			    : centerOfMass_{centerOfMass}
-			    , mass_{mass}
-			    , domain_{domain} {}
+			/// Construct a Node for a given set of Particles and domain
+			/// \param particles A list of pointers to particles
+			/// \param domain The domain of the Node
+			/// \throw std::invalid_argument If list of particles is empty
+			Node(const std::list<std::shared_ptr<Particle>>& particles, Domain domain);
 
-			/// Get the center of mass of the node
+			/// Get the center of mass of the Node
 			/// \return The center of mass
 			Vec3 centerOfMass() const { return centerOfMass_; }
 
-			/// Get the mass of the node
+			/// Get the mass of the Node
 			/// \return The mass
 			float mass() const { return mass_; }
-
-		protected:
-			Vec3 centerOfMass_{0, 0, 0}; ///< The center of mass of the node
-			float mass_{1};              ///< The mass of the node
-			Domain domain_{};            ///< The domain of the node
-		};
-
-		/// An internal node in the Octree. This node represents a group of nodes underneath it
-		class InternalNode : public Node {
-		public:
-			/// Construct an InternalNode with default values
-			InternalNode() = default;
-
-			/// Construct an InternalNode from a set of particles and given domain
-			/// \param particles A list of particles
-			/// \param domain The domain of the node
-			InternalNode(const std::list<Particle>& particles, Domain domain);
 
 		private:
 			/// Compute the total mass of a given list of Nodes. Should be used to set the mass
 			/// of the Node on construction and update
-			/// \param nodes The nodes to calculate the mass of. Is usually subnodes_
-			/// \return The total mass of the nodes
-			static float computeMass(const std::list<Node>& nodes);
+			/// \param Nodes The Nodes to calculate the mass of. Is usually children_
+			/// \return The total mass of the Nodes
+			static float computeMass(const std::list<Node>& Nodes);
 
 			/// Compute the center of mass of as given list of Nodes. Should be used to set the
 			/// center of mass of the Node on construciton and update.
-			/// \param nodes The nodes to calculate the center of mass of. Is usually subnodes_
-			/// \return The center of mass of the nodes
-			static Vec3 computeCenterOfMass(const std::list<Node>& nodes);
+			/// \param Nodes The Nodes to calculate the center of mass of. Is usually children_
+			/// \return The center of mass of the Nodes
+			static Vec3 computeCenterOfMass(const std::list<Node>& Nodes);
 
-			std::list<Node> subnodes_; ///< The subnodes of this node in the Octree
+			Vec3 centerOfMass_{0, 0, 0};                       ///< Center of mass of the Node
+			float mass_{1};                                    ///< Mass of the Node
+			Domain domain_{};                                  ///< Domain of the Node
+			std::list<std::shared_ptr<Particle>> particles_{}; ///< Represented Partaicles
+			std::list<Node> children_{};                       ///< Child Nodes
 		};
 
-		/// An external node in the Octree. This node represents a single particle in the Octree. It
-		/// has no child nodes
-		class ExternalNode : public Node {
-		public:
-			/// Construct an ExternalNode with default values
-			ExternalNode() = default;
-
-			/// Construct an ExternalNode with a given Particle and domain. The mass and center of
-			/// mass are set to the Particle's mass and position respectively
-			/// \param particle The particle this Node should represent
-			/// \param domain The domain of the Node
-			ExternalNode(const Particle& particle, Domain domain)
-			    : Node{particle.pos(), particle.mass(), domain}
-			    , particle{particle} {}
-
-			Particle particle; ///< The particle this Node represents
-		};
-
-		std::unique_ptr<Node> root_; ///< The root node of the Octree
+		Node root_; ///< The root Node of the Octree
 	};
 }
 
