@@ -1,7 +1,8 @@
 set(SOURCE_FILES
-	main.cpp
-	simulation.cpp
-	particle.cpp)
+    main.cpp
+    simulation.cpp
+    particle.cpp
+    octree.cpp)
 
 add_executable(gravity ${SOURCE_FILES})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
