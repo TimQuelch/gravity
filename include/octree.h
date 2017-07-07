@@ -14,6 +14,9 @@ namespace gravity {
 	/// Class to hold an Octree of particles
 	class Octree {
 	public:
+		/// Shorthand for a list of Particles
+		using ParticleList = std::list<std::shared_ptr<Particle>>;
+
 		/// A class to hold the 3D bounds of a region of space
 		class Domain {
 		public:
@@ -51,13 +54,17 @@ namespace gravity {
 		/// \param particles A list of particles
 		/// \param domain The domain of the Octree
 		/// \throw std::invalid_argument If list of particles is empty
-		Octree(const std::list<std::shared_ptr<Particle>>& particles, Domain domain);
+		Octree(const ParticleList& particles, Domain domain);
 
 		/// Get the Domain of the Octree
 		/// \return The Domain of the Octree
 		Domain domain() const;
 
 	private:
+		class Node;
+		/// Shorthand for a list of Nodes
+		using NodeList = std::list<std::shared_ptr<Node>>;
+
 		/// A Node in the Octree. Has a mass, center of mass, and a domain
 		class Node {
 		public:
@@ -68,7 +75,7 @@ namespace gravity {
 			/// \param particles A list of pointers to particles
 			/// \param domain The domain of the Node
 			/// \throw std::invalid_argument If list of particles is empty
-			Node(const std::list<std::shared_ptr<Particle>>& particles, Domain domain);
+			Node(const ParticleList& particles, Domain domain);
 
 			/// Get the center of mass of the Node
 			/// \return The center of mass
@@ -83,22 +90,30 @@ namespace gravity {
 			/// of the Node on construction and update
 			/// \param Nodes The Nodes to calculate the mass of. Is usually children_
 			/// \return The total mass of the Nodes
-			static float computeMass(const std::list<Node>& Nodes);
+			static float computeMass(const NodeList& Nodes);
 
 			/// Compute the center of mass of as given list of Nodes. Should be used to set the
 			/// center of mass of the Node on construciton and update.
 			/// \param Nodes The Nodes to calculate the center of mass of. Is usually children_
 			/// \return The center of mass of the Nodes
-			static Vec3 computeCenterOfMass(const std::list<Node>& Nodes);
+			static Vec3 computeCenterOfMass(const NodeList& Nodes);
 
-			Vec3 centerOfMass_{0, 0, 0};                       ///< Center of mass of the Node
-			float mass_{1};                                    ///< Mass of the Node
-			Domain domain_{};                                  ///< Domain of the Node
-			std::list<std::shared_ptr<Particle>> particles_{}; ///< Represented Partaicles
-			std::list<Node> children_{};                       ///< Child Nodes
+			/// Build a list of child nodes from a given list of particles
+			/// \param particles A list of pointers to particles
+			/// \param domain The domain of the parent node
+			/// \return A list of child nodes
+			/// \throw std::invalid_argument If the list of particles does not contain at least two
+			/// particles
+			static NodeList buildChildren(const ParticleList& particles, Domain domain);
+
+			Vec3 centerOfMass_{0, 0, 0}; ///< Center of mass of the Node
+			float mass_{1};              ///< Mass of the Node
+			Domain domain_{};            ///< Domain of the Node
+			ParticleList particles_{};   ///< Represented Partaicles
+			NodeList children_{};        ///< Child Nodes
 		};
 
-		Node root_; ///< The root Node of the Octree
+		std::shared_ptr<Node> root_; ///< The root Node of the Octree
 	};
 }
 

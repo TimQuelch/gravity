@@ -81,14 +81,14 @@ namespace gravity {
 		return {mid, outerCorner};
 	}
 
-	Octree::Octree(const std::list<std::shared_ptr<Particle>>& particles, Domain domain)
-	    : root_{particles, domain} {
+	Octree::Octree(const ParticleList& particles, Domain domain)
+	    : root_{std::make_shared<Node>(particles, domain)} {
 		if (particles.empty()) {
 			throw std::invalid_argument("Must be at least one particle in Octree");
 		}
 	}
 
-	Octree::Node::Node(const std::list<std::shared_ptr<Particle>>& particles, Domain domain)
+	Octree::Node::Node(const ParticleList& particles, Domain domain)
 	    : domain_{domain}
 	    , particles_{particles}
 	    , children_{} {
@@ -99,35 +99,44 @@ namespace gravity {
 			mass_ = (*(particles.begin()))->mass();
 			centerOfMass_ = (*(particles.begin()))->pos();
 		} else {
-			std::array<std::list<std::shared_ptr<Particle>>, 8> octants{};
-			for (std::shared_ptr<Particle> particle : particles) {
-				octants[domain.getOctantIndex(particle->pos())].push_back(particle);
-			}
-			for (int i = 0; i < octants.size(); i++) {
-				if (!octants[i].empty()) {
-					children_.push_back(Node{particles, domain.getOctantDomain(i)});
-				}
-			}
+			children_ = buildChildren(particles, domain);
 			mass_ = computeMass(children_);
 			centerOfMass_ = computeCenterOfMass(children_);
 		}
 	}
 
-	float Octree::Node::computeMass(const std::list<Node>& nodes) {
+	float Octree::Node::computeMass(const NodeList& nodes) {
 		float sum{0};
-		for (const Node& node : nodes) {
-			sum += node.mass();
+		for (const auto& node : nodes) {
+			sum += node->mass();
 		}
 		return sum;
 	}
 
-	Vec3 Octree::Node::computeCenterOfMass(const std::list<Node>& nodes) {
+	Vec3 Octree::Node::computeCenterOfMass(const NodeList& nodes) {
 		float sumMass = 0;
 		Vec3 sumProduct{0, 0, 0};
-		for (const Node& node : nodes) {
-			sumProduct += node.mass() * node.centerOfMass();
-			sumMass += node.mass();
+		for (const auto& node : nodes) {
+			sumProduct += node->mass() * node->centerOfMass();
+			sumMass += node->mass();
 		}
 		return sumProduct * (1 / sumMass);
+	}
+
+	Octree::NodeList Octree::Node::buildChildren(const ParticleList& particles, Domain domain) {
+		if (particles.size() < 2) {
+			throw std::invalid_argument("Must be at least two particles in list");
+		}
+		NodeList children{};
+		std::array<ParticleList, 8> octants{};
+		for (const auto& particle : particles) {
+			octants[domain.getOctantIndex(particle->pos())].push_back(particle);
+		}
+		for (int i = 0; i < octants.size(); i++) {
+			if (!octants[i].empty()) {
+				children.push_back(std::make_shared<Node>(particles, domain.getOctantDomain(i)));
+			}
+		}
+		return children;
 	}
 }
