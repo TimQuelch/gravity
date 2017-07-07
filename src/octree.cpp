@@ -98,9 +98,11 @@ namespace gravity {
 			throw std::invalid_argument("Node must contain at least one Particle");
 		}
 		if (particles.size() == 1) {
+			// Set mass and centerOfMass directly if there is only one particle
 			mass_ = (*(particles.begin()))->mass();
 			centerOfMass_ = (*(particles.begin()))->pos();
 		} else {
+			// Build the child nodes and compute the mass and center of mass
 			children_ = buildChildren(particles, domain);
 			mass_ = computeMass(children_);
 			centerOfMass_ = computeCenterOfMass(children_);
@@ -198,14 +200,16 @@ namespace gravity {
 		if (particles.size() < 2) {
 			throw std::invalid_argument("Must be at least two particles in list");
 		}
-		NodeList children{};
+		// Create an array of particle lists for the octants
 		std::array<ParticleList, 8> octants{};
 		for (const auto& particle : particles) {
 			octants[domain.getOctantIndex(particle->pos())].push_back(particle);
 		}
+		// Create Nodes for each of the octants
+		NodeList children{};
 		for (int i = 0; i < octants.size(); i++) {
 			if (!octants[i].empty()) {
-				children.push_back(std::make_shared<Node>(particles, domain.getOctantDomain(i)));
+				children.push_back(std::make_shared<Node>(octants[i], domain.getOctantDomain(i)));
 			}
 		}
 		return children;
