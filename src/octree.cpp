@@ -1,6 +1,7 @@
 #include "octree.h"
 
 #include <algorithm>
+#include <stack>
 
 namespace gravity {
 	Octree::Domain::Domain(Vec3 v1, Vec3 v2)
@@ -96,7 +97,7 @@ namespace gravity {
 		if (particles.empty()) {
 			throw std::invalid_argument("Node must contain at least one Particle");
 		}
-		if (particles.size() == 1) {
+		if (isExteriorNode()) {
 			// Set mass and centerOfMass directly if there is only one particle
 			mass_ = (*(particles.begin()))->mass();
 			centerOfMass_ = (*(particles.begin()))->pos();
@@ -127,7 +128,7 @@ namespace gravity {
 
 		// If there are no child Nodes, build them.
 		// This happens when the Node was previously an external Node
-		if (children_.empty()) {
+		if (isExteriorNode()) {
 			children_ = buildChildren(particles_, domain_);
 		} else {
 			// If any of the current children has an appropriate domain, add the particle to it
@@ -158,9 +159,14 @@ namespace gravity {
 		// Remove particle from the list of particles
 		particles_.erase(std::find(particles_.begin(), particles_.end(), particle));
 		// Remove the particle from the relevant child
-		for (auto child : children_) {
+		for (auto it = children_.begin(); it != children_.end(); ++it) {
+			NodePtr child{*it};
 			if (child->contains(particle)) {
-				child->removeParticle(particle);
+				if (child->isExteriorNode()) {
+					children_.erase(it);
+				} else {
+					child->removeParticle(particle);
+				}
 				break;
 			}
 		}
@@ -173,6 +179,35 @@ namespace gravity {
 			}
 		}
 		return false;
+	}
+
+	void Octree::Node::rebalanceNode(std::stack<NodePtr> history) {
+		if (history.top().get() != this) {
+			throw std::invalid_argument{"Top value of the history stack should be *this"};
+		}
+		if (isExteriorNode()) {
+			// If it is an exterior node, check if the particle is within the Domain bounds
+			ParticlePtr particle = *particles_.begin();
+			if (!domain_.isInDomain(particle->pos())) {
+				// Remove the particle from the current node
+				removeParticle(particle);
+				while (!history.empty()) {
+					// Traverse up the history until the particle is in the Domain
+					history.pop();
+					if (history.top()->domain_.isInDomain(particle->pos())) {
+						// Add the particle to that Node
+						history.top()->addParticle(particle);
+					}
+				}
+			}
+		} else {
+			// Recursively rebalance all child Nodes
+			for (NodePtr child : children_) {
+				std::stack<NodePtr> newHistory{history};
+				newHistory.push(child);
+				child->rebalanceNode(newHistory);
+			}
+		}
 	}
 
 	float Octree::Node::computeMass(const NodeList& nodes) {
@@ -210,5 +245,13 @@ namespace gravity {
 			}
 		}
 		return children;
+	}
+
+	bool Octree::Node::isExteriorNode() const { return children_.empty(); }
+
+	void Octree::rebalanceTree() {
+		std::stack<NodePtr> history{};
+		history.push(root_);
+		root_->rebalanceNode(history);
 	}
 }

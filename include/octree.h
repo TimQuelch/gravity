@@ -8,6 +8,7 @@
 #include "particle.h"
 #include <list>
 #include <memory>
+#include <stack>
 #include <stdexcept>
 
 namespace gravity {
@@ -110,6 +111,12 @@ namespace gravity {
 			/// \return Whether the particle is in the Node or not
 			bool contains(const ParticlePtr& particle) const;
 
+			/// Recursively rebalance Node
+			/// \param history Parents of the Nodes. Top value in history should be a
+			/// std::shared_ptr<Node> of `this`
+			/// \throw std::invalid_argument If the top value of history is not `this`
+			void rebalanceNode(std::stack<NodePtr> history);
+
 		private:
 			/// Compute the total mass of a given list of Nodes. Should be used to set the mass
 			/// of the Node on construction and update
@@ -131,6 +138,10 @@ namespace gravity {
 			/// particles
 			static NodeList buildChildren(const ParticleList& particles, Domain domain);
 
+			/// Checks if the Node represents a single particle
+			/// \return bool True if Node is exterior
+			bool isExteriorNode() const;
+
 			Vec3 centerOfMass_{0, 0, 0}; ///< Center of mass of the Node
 			float mass_{1};              ///< Mass of the Node
 			Domain domain_{};            ///< Domain of the Node
@@ -138,6 +149,7 @@ namespace gravity {
 			NodeList children_{};        ///< Child Nodes
 		};
 
+		/// Move particles which have left their Node's Domain into the correct Node
 		void rebalanceTree();
 
 		NodePtr root_; ///< The root Node of the Octree
