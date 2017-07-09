@@ -82,7 +82,7 @@ namespace gravity {
 			return Vec3{vec} *= scalar;
 		}
 
-		/// \copydoc Vec3::operator*
+		/// \copydoc Vec3::operator*(Scalar,const Vec3&)
 		template <typename Scalar>
 		friend Vec3 operator*(const Vec3& vec, Scalar scalar) {
 			return Vec3{vec} *= scalar;
