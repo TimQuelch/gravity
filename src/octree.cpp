@@ -169,7 +169,7 @@ namespace gravity {
 		}
 	}
 
-	bool Octree::Node::contains(const ParticlePtr& particle) {
+	bool Octree::Node::contains(const ParticlePtr& particle) const {
 		for (const auto& p : particles_) {
 			if (p == particle) {
 				return true;

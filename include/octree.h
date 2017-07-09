@@ -106,7 +106,7 @@ namespace gravity {
 			/// Check whether the Node contains a particle
 			/// \param particle A Particle
 			/// \return Whether the particle is in the Node or not
-			bool contains(const ParticlePtr& particle);
+			bool contains(const ParticlePtr& particle) const;
 
 		private:
 			/// Compute the total mass of a given list of Nodes. Should be used to set the mass
