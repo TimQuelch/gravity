@@ -92,8 +92,7 @@ namespace gravity {
 
 	Octree::Node::Node(const ParticleList& particles, Domain domain)
 	    : domain_{domain}
-	    , particles_{particles}
-	    , children_{} {
+	    , particles_{particles} {
 		if (particles.empty()) {
 			throw std::invalid_argument("Node must contain at least one Particle");
 		}
@@ -110,9 +109,7 @@ namespace gravity {
 	}
 
 	Octree::Node::Node(const ParticlePtr& particle, Domain domain)
-	    : domain_{domain}
-	    , particles_{}
-	    , children_{} {
+	    : domain_{domain} {
 		particles_.push_back(particle);
 		mass_ = particle->mass();
 		centerOfMass_ = particle->pos();
