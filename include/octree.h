@@ -95,7 +95,8 @@ namespace gravity {
 			/// \return The mass
 			float mass() const { return mass_; }
 
-			/// Add a particle to the Node
+			/// Add a particle to the Node. Doesn't update values of the nodes, need to call
+			/// updateNodevalues afterwards.
 			/// \param particle A pointer to a particle
 			/// \throw std::invalid_argument If the particle is not within the Node Domain, or the
 			/// particle is already held by the Node
@@ -117,6 +118,9 @@ namespace gravity {
 			/// \throw std::invalid_argument If the top value of history is not `this`
 			void rebalanceNode(std::stack<NodePtr> history);
 
+			/// Recursively update the mass and center of mass of the Node
+			void updateNodeValues();
+
 		private:
 			/// Compute the total mass of a given list of Nodes. Should be used to set the mass
 			/// of the Node on construction and update
@@ -130,12 +134,12 @@ namespace gravity {
 			/// \return The center of mass of the Nodes
 			static Vec3 computeCenterOfMass(const NodeList& nodes);
 
-			/// Build a list of child nodes from a given list of particles
+			/// Build a list of child nodes from a given list of Particles. If the list of Particles
+			/// contains a single Particle, an empty list is returned
 			/// \param particles A list of pointers to particles
 			/// \param domain The Domain of the parent node
 			/// \return A list of child nodes
-			/// \throw std::invalid_argument If the list of particles does not contain at least two
-			/// particles
+			/// \throw std::invalid_argument If the list of particles is empty
 			static NodeList buildChildren(const ParticleList& particles, Domain domain);
 
 			/// Checks if the Node represents a single particle

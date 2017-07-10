@@ -97,16 +97,8 @@ namespace gravity {
 		if (particles.empty()) {
 			throw std::invalid_argument("Node must contain at least one Particle");
 		}
-		if (isExteriorNode()) {
-			// Set mass and centerOfMass directly if there is only one particle
-			mass_ = (*(particles.begin()))->mass();
-			centerOfMass_ = (*(particles.begin()))->pos();
-		} else {
-			// Build the child nodes and compute the mass and center of mass
-			children_ = buildChildren(particles, domain);
-			mass_ = computeMass(children_);
-			centerOfMass_ = computeCenterOfMass(children_);
-		}
+		children_ = buildChildren(particles, domain);
+		updateNodeValues();
 	}
 
 	Octree::Node::Node(ParticlePtr particle, Domain domain)
@@ -147,9 +139,6 @@ namespace gravity {
 				children_.push_back(newChild);
 			}
 		}
-		// Recompute mass and center of mass
-		mass_ = computeMass(children_);
-		centerOfMass_ = computeCenterOfMass(children_);
 	}
 
 	void Octree::Node::removeParticle(ParticlePtr particle) {
@@ -197,6 +186,7 @@ namespace gravity {
 					if (history.top()->domain_.isInDomain(particle->pos())) {
 						// Add the particle to that Node
 						history.top()->addParticle(particle);
+						history.top()->updateNodeValues();
 					}
 				}
 			}
@@ -207,6 +197,20 @@ namespace gravity {
 				newHistory.push(child);
 				child->rebalanceNode(newHistory);
 			}
+		}
+	}
+
+	void Octree::Node::updateNodeValues() {
+		if (isExteriorNode()) {
+			ParticlePtr particle = *particles_.begin();
+			mass_ = particle->mass();
+			centerOfMass_ = particle->pos();
+		} else {
+			for (auto child : children_) {
+				child->updateNodeValues();
+			}
+			mass_ = computeMass(children_);
+			centerOfMass() = computeCenterOfMass(children_);
 		}
 	}
 
@@ -229,8 +233,11 @@ namespace gravity {
 	}
 
 	Octree::NodeList Octree::Node::buildChildren(const ParticleList& particles, Domain domain) {
-		if (particles.size() < 2) {
-			throw std::invalid_argument("Must be at least two particles in list");
+		if (particles.empty()) {
+			throw std::invalid_argument{"Must be at least one particle in list"};
+		}
+		if (particles.size() == 1) {
+			return {};
 		}
 		// Create an array of particle lists for the octants
 		std::array<ParticleList, 8> octants{};
