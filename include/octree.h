@@ -85,7 +85,7 @@ namespace gravity {
 			/// Construct a Node for a given Particle and Domain
 			/// \param particle A Particle
 			/// \param domain Domain of the Node
-			Node(const ParticlePtr& particle, Domain domain);
+			Node(ParticlePtr particle, Domain domain);
 
 			/// Get the center of mass of the Node
 			/// \return The center of mass
@@ -99,17 +99,17 @@ namespace gravity {
 			/// \param particle A pointer to a particle
 			/// \throw std::invalid_argument If the particle is not within the Node Domain, or the
 			/// particle is already held by the Node
-			void addParticle(const ParticlePtr& particle);
+			void addParticle(ParticlePtr particle);
 
 			/// Remove a particle from the Node
 			/// \param particle A pointer to a particle
 			/// \throw std::invalid_argument If the particle is not held by the Node
-			void removeParticle(const ParticlePtr& particle);
+			void removeParticle(ParticlePtr particle);
 
 			/// Check whether the Node contains a particle
 			/// \param particle A Particle
 			/// \return Whether the particle is in the Node or not
-			bool contains(const ParticlePtr& particle) const;
+			bool contains(ParticlePtr particle) const;
 
 			/// Recursively rebalance Node
 			/// \param history Parents of the Nodes. Top value in history should be a

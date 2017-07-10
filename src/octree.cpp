@@ -109,14 +109,14 @@ namespace gravity {
 		}
 	}
 
-	Octree::Node::Node(const ParticlePtr& particle, Domain domain)
+	Octree::Node::Node(ParticlePtr particle, Domain domain)
 	    : domain_{domain} {
 		particles_.push_back(particle);
 		mass_ = particle->mass();
 		centerOfMass_ = particle->pos();
 	}
 
-	void Octree::Node::addParticle(const ParticlePtr& particle) {
+	void Octree::Node::addParticle(ParticlePtr particle) {
 		if (!domain_.isInDomain(particle->pos())) {
 			throw std::invalid_argument("Particle is not in the Node's Domain");
 		}
@@ -152,7 +152,7 @@ namespace gravity {
 		centerOfMass_ = computeCenterOfMass(children_);
 	}
 
-	void Octree::Node::removeParticle(const ParticlePtr& particle) {
+	void Octree::Node::removeParticle(ParticlePtr particle) {
 		if (!contains(particle)) {
 			throw std::invalid_argument("Particle is not held in the node");
 		}
@@ -172,7 +172,7 @@ namespace gravity {
 		}
 	}
 
-	bool Octree::Node::contains(const ParticlePtr& particle) const {
+	bool Octree::Node::contains(ParticlePtr particle) const {
 		for (const auto& p : particles_) {
 			if (p == particle) {
 				return true;
