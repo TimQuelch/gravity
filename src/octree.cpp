@@ -93,12 +93,17 @@ namespace gravity {
 
 	Octree::Node::Node(const ParticleList& particles, Domain domain)
 	    : domain_{domain}
-	    , particles_{particles} {
+	    , particles_{particles}
+	    , children_{buildChildren(particles_, domain_)} {
 		if (particles.empty()) {
 			throw std::invalid_argument("Node must contain at least one Particle");
 		}
-		children_ = buildChildren(particles, domain);
-		updateNodeValues();
+		if (isExteriorNode()) {
+			updateNodeValues();
+		} else {
+			mass_ = computeMass(children_);
+			centerOfMass_ = computeCenterOfMass(children_);
+		}
 	}
 
 	Octree::Node::Node(ParticlePtr particle, Domain domain)
@@ -139,6 +144,9 @@ namespace gravity {
 				children_.push_back(newChild);
 			}
 		}
+		// Recompute mass and center of mass
+		mass_ = computeMass(children_);
+		centerOfMass_ = computeCenterOfMass(children_);
 	}
 
 	void Octree::Node::removeParticle(ParticlePtr particle) {
@@ -186,7 +194,6 @@ namespace gravity {
 					if (history.top()->domain_.isInDomain(particle->pos())) {
 						// Add the particle to that Node
 						history.top()->addParticle(particle);
-						history.top()->updateNodeValues();
 					}
 				}
 			}

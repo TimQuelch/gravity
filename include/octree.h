@@ -95,8 +95,7 @@ namespace gravity {
 			/// \return The mass
 			float mass() const { return mass_; }
 
-			/// Add a particle to the Node. Doesn't update values of the nodes, need to call
-			/// updateNodevalues afterwards.
+			/// Add a particle to the Node
 			/// \param particle A pointer to a particle
 			/// \throw std::invalid_argument If the particle is not within the Node Domain, or the
 			/// particle is already held by the Node
