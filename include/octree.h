@@ -53,11 +53,29 @@ namespace gravity {
 			Vec3 max_{0, 0, 0}; ///< The maximum extremes of the Domain
 		};
 
+		/// Construct Octree with default values
+		Octree() = default;
+
+		/// Copy construct an Octree
+		/// \param other Another Octree
+		Octree(const Octree& other);
+
+		/// Move construct and Octree
+		/// \param other Another Octree
+		Octree(Octree&& other);
+
+		/// Assignment operator using copy swap
+		/// \param other Another Octree
+		Octree& operator=(Octree other);
+
 		/// Construct an Octree for a given set of particles and given Domain
 		/// \param particles A list of particles
 		/// \param domain The Domain of the Octree
 		/// \throw std::invalid_argument If list of particles is empty
 		Octree(const ParticleList& particles, Domain domain);
+
+		/// Default destructor
+		~Octree() = default;
 
 		/// Get the Domain of the Octree
 		/// \return The Domain of the Octree
@@ -76,6 +94,18 @@ namespace gravity {
 			/// Construct a Node with default values
 			Node() = default;
 
+			/// Copy construct a Node
+			/// \param other Another Node
+			Node(const Node& other);
+
+			/// Move construct a Node
+			/// \param other Another Node
+			Node(Node&& other);
+
+			/// Assignment operator for Node using copy swap
+			/// \param other Another Node
+			Node& operator=(Node other);
+
 			/// Construct a Node for a given set of Particles and Domain
 			/// \param particles A list of pointers to particles
 			/// \param domain The Domain of the Node
@@ -86,6 +116,9 @@ namespace gravity {
 			/// \param particle A Particle
 			/// \param domain Domain of the Node
 			Node(ParticlePtr particle, Domain domain);
+
+			/// Default destructor
+			~Node() = default;
 
 			/// Get the center of mass of the Node
 			/// \return The center of mass

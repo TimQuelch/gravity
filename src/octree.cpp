@@ -84,11 +84,46 @@ namespace gravity {
 		return {mid, outerCorner};
 	}
 
+	Octree::Octree(const Octree& other)
+	    : root_{std::make_shared<Node>(*other.root_)} {}
+
+	Octree::Octree(Octree&& other)
+	    : root_{std::move(other.root_)} {}
+
+	Octree& Octree::operator=(Octree other) {
+		std::swap(*this, other);
+		return *this;
+	}
+
 	Octree::Octree(const ParticleList& particles, Domain domain)
 	    : root_{std::make_shared<Node>(particles, domain)} {
 		if (particles.empty()) {
 			throw std::invalid_argument("Must be at least one particle in Octree");
 		}
+	}
+
+	Octree::Node::Node(const Node& other)
+	    : centerOfMass_{other.centerOfMass_}
+	    , mass_{other.mass_}
+	    , domain_{other.domain_} {
+		// Copy the list of Particles from the old Node
+		for (ParticlePtr old : other.particles_) {
+			particles_.push_back(std::make_shared<Particle>(*old));
+		}
+		// Build the child Nodes
+		children_ = buildChildren(particles_, domain_);
+	}
+
+	Octree::Node::Node(Node&& other)
+	    : centerOfMass_{other.centerOfMass_}
+	    , mass_{other.mass_}
+	    , domain_{other.domain_}
+	    , particles_{std::move(other.particles_)}
+	    , children_{std::move(other.children_)} {}
+
+	Octree::Node& Octree::Node::operator=(Node other) {
+		std::swap(*this, other);
+		return *this;
 	}
 
 	Octree::Node::Node(const ParticleList& particles, Domain domain)
