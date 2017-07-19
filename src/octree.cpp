@@ -144,8 +144,7 @@ namespace gravity {
 	Octree::Node::Node(ParticlePtr particle, Domain domain)
 	    : domain_{domain} {
 		particles_.push_back(particle);
-		mass_ = particle->mass();
-		centerOfMass_ = particle->pos();
+		updateNodeValues();
 	}
 
 	void Octree::Node::addParticle(ParticlePtr particle) {
